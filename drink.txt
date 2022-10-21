@@ -1,0 +1,18 @@
+Orange Juice
+1.99
+10
+Apple Juice
+1.99
+9
+Coke
+2.99
+13
+Diet Coke
+2.99
+12
+Doctor Pepper
+2.99
+8
+Sprite
+2.99
+8

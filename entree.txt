@@ -1,0 +1,15 @@
+House Hamburger
+9.50
+6
+Cream Checken Alfredo
+13.99
+3
+Chefs Special
+14.99
+1
+Beef Stake
+16.50
+2
+Chicken Stake
+14.25
+4
