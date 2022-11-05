@@ -1,15 +1,7 @@
 // Name: Saori Kojima
 // Program Description: Menu System
-// Date: 10/17/22
+// Date: 10/17/22 - 10/23/22
 
-/*
-NOTE:
-
-ƒƒjƒ…[A’•¶‚Ü‚Å³í
-
-To-Do
->> cin Error ŽÀ‘•
-*/
 
 #include <iostream>
 #include <string>
@@ -49,7 +41,7 @@ public:
 			// show top menu
 			topMenu();
 
-			int choice = selectionT();
+			int choice = selection(6);
 
 			// move to each category
 			int qty = 0;
@@ -81,16 +73,23 @@ public:
 
 			case 5:
 				if (subtotal != 0)
+					changeOrder();
+
+			break;
+
+			case 6:
+				if (subtotal != 0)
 				{
 					checkout();
 					trigger = true;
 				}
 
-				break;
+			break;
 
 			default:
 				break;
 			}
+
 		} while (trigger != true);
 	}
 
@@ -123,8 +122,8 @@ public:
 		inFile.close();
 	}
 
-	// user input only for top menu
-	int selectionT()
+	// user input only for top menu and change order
+	int selection(int size)
 	{
 		int choice;
 		bool error = true;
@@ -138,7 +137,7 @@ public:
 			cin >> choice;
 
 			// check error
-			error = inputErrorT(choice, 5);
+			error = inputError(choice, size);
 
 		} while (error == true);
 
@@ -172,6 +171,29 @@ public:
 		return choice;
 	}
 
+	// user input for order history
+	int selectionO()
+	{
+		int choice;
+
+		bool error = false;
+
+		cout << "-------------------------------------" << endl;
+		cout << "Enter your choice by number" << endl;
+
+		do
+		{
+			cout << ">> ";
+			cin >> choice;
+
+			// check error
+			error = inputError(choice, oName);
+
+		} while (error == true);
+
+		return choice;
+	}
+
 	// user input for quantity
 	int qtyIn(int choice, vector<int>& catQty)
 	{
@@ -190,8 +212,6 @@ public:
 			error = qtyError(choice, qty, catQty);
 
 		} while (error == true);
-
-		catQty[choice - 1] = catQty[choice - 1] - qty;
 
 		return qty;
 	}
@@ -217,11 +237,10 @@ public:
 		cout << "2. Drink" << endl;
 		cout << "3. Entree" << endl;
 		cout << "4. Desert" << endl;
-		cout << "5. Go to Check" << endl;
-		cout << endl;
-		cout << "Subtotal: $" << subtotal << endl;
+		cout << "5. *Change Order" << endl;
+		cout << "6. *Go to Check" << endl;
 
-		showOrder(oName, oPrice, oQty);
+		showOrder();
 	}
 	
 	// output as a list of menu
@@ -242,17 +261,14 @@ public:
 				cout << a + 1 << ". " << left << setw(25) << name[a] << setw(3) << "- $" << right << setw(6) << price[a] << endl;
 		}
 
-		cout << name.size() + 1 << ". " << left << setw(25) << "Go Back" << endl;
+		cout << name.size() + 1 << ". " << left << setw(25) << "(Go Back)" << endl;
 
-		cout << endl;
-		cout << "Subtotal: $" << subtotal << endl;
-
-		showOrder(oName, oPrice, oQty);
+		showOrder();
 
 	}
 
 	// show current order with price + subtotal
-	void showOrder(vector<string>& name, vector<double>& price, vector<int>& quantity)
+	void showOrder()
 	{
 		cout << endl;
 		cout << "-------------------------------------" << endl;
@@ -265,11 +281,69 @@ public:
 			cout << fixed << showpoint;
 			cout << setprecision(2);
 
-			for (int a = 0; a < name.size(); a++)
-				cout << left << setw(27) << name[a] << setw(3) << quantity[a] << setw(1) << "$" << right << setw(6) << price[a] << endl;
+			for (int a = 0; a < oName.size(); a++)
+				cout << left << setw(27) << oName[a] << setw(3) << oQty[a] << setw(1) << "$" << right << setw(6) << oPrice[a] << endl;
 
 			cout << endl;
 			cout << left << setw(27) << "Subtotal" << right << setw(4) << "$" << setw(6) << subtotal << endl;
+		}
+
+
+	}
+
+	// change any item in the order
+	void changeOrder()
+	{
+		int choice;
+		int choice2;
+
+		logo();
+
+		cout << "Which item do you want to change?" << endl;
+		cout << endl;
+
+		// show items
+		for (int a = 0; a < oName.size(); a++)
+			cout << right << setw(2) << a + 1 << left << setw(2) << ". " << setw(23) << oName[a] << setw(3) << oQty[a] << setw(1) << "$" << right << setw(6) << oPrice[a] << endl;
+
+		cout << right << setw(2) << oName.size() + 1 << left << setw(2) << ". (Go Back)" << endl;
+
+		cout << endl;
+
+		choice = selectionO();
+
+		// show the way to change
+		if (choice != oName.size() + 1)
+		{
+			logo();
+
+			cout << "How do you want to change the item?" << endl;
+			cout << endl;
+			cout << "1. Change Quantity" << endl;
+			cout << "2. Remove" << endl;
+			cout << "3. (Go Back)" << endl;
+
+			cout << endl;
+
+			choice2 = selection(3);
+
+			switch (choice2)
+			{
+			case 1:
+				changeQty(choice-1);
+				break;
+
+			case 2:
+				cancelOrder(choice-1);
+				break;
+
+			case 3:
+
+				break;
+
+			default:
+				break;
+			}
 		}
 
 
@@ -308,8 +382,206 @@ public:
 		// add subtotal
 		subtotal = subtotal + tPrice * quantity;
 
-		// subtruct quatity
+		// subtruct quantity
 		catQty[choice - 1] = catQty[choice - 1] - quantity;
+	}
+
+	// change quantity
+	void changeQty(int position)
+	{
+		logo();
+
+		// show current item
+		cout << "Current: " << endl;
+		cout << setw(27) << oName[position] << setw(3) << oQty[position] << setw(1) << "$" << right << setw(6) << oPrice[position] << endl;
+		cout << endl;
+
+		// search item by each category
+		bool isHere = false;
+		int orgPosition;	// position for searched item
+
+		// search in APPETIZER
+		orgPosition = searchItem(position, oName, appName, isHere);
+
+		// update quantity
+		if (isHere == true)
+		{
+			appQty[orgPosition] = appQty[orgPosition] + oQty[position];
+			qtyUpdate(position, orgPosition, appQty);
+		}
+		else
+		{
+			// search in DRINK
+			orgPosition = searchItem(position, oName, drinkName, isHere);
+
+			if (isHere == true)
+			{
+				drinkQty[orgPosition] = drinkQty[orgPosition] + oQty[position];
+				qtyUpdate(position, orgPosition, drinkQty);
+			}
+			else
+			{
+				// search in DESERT
+				orgPosition = searchItem(position, oName, desName, isHere);
+
+				if (isHere == true)
+				{
+					desQty[orgPosition] = desQty[orgPosition] + oQty[position];
+					qtyUpdate(position, orgPosition, desQty);
+				}
+				else
+				{
+					// search in ENTREE
+					orgPosition = searchItem(position, oName, entName, isHere);
+
+					if (isHere == true)
+					{
+						entQty[orgPosition] = entQty[orgPosition] + oQty[position];
+						qtyUpdate(position, orgPosition, entQty);
+					}
+				}
+			}
+		}
+
+	}
+
+	void qtyUpdate(int sourceP, int catP, vector<int>& catQty)
+	{
+		int nQty;	// new quantity
+		bool error = false;
+
+		// substitute subtotal
+
+		subtotal = subtotal - (oPrice[sourceP] * oQty[sourceP]);
+
+		cout << "-------------------------------------" << endl;
+		cout << "Enter NEW Quantity" << endl;
+
+		do
+		{
+			cout << ">> ";
+			cin >> nQty;
+
+			// error check
+			if (nQty < 0)
+			{
+				cout << "*Input Error*" << endl;
+				cout << "Please Re-Enter a Valid Number." << endl;
+
+				error = true;
+			}
+			else if (nQty > catQty[catP])
+			{
+				cout << "I'm sorry. We cannot serve that many." << endl;
+				cout << "You can order up to " << catQty[catP] << " for this menu." << endl;
+
+				error = true;
+			}
+			else if (nQty == 0)
+			{
+				subtotal = subtotal + (oPrice[sourceP] * oQty[sourceP]);	// it will substitude again in the next function
+
+				cancelOrder(sourceP);
+				break;
+			}
+			else
+				error = false;
+
+		} while (error == true);
+
+		if (nQty != 0)
+		{
+			oQty[sourceP] = nQty;
+
+			// update stock
+			catQty[catP] = catQty[catP] - nQty;
+
+			// update subtotal
+			subtotal = subtotal + oPrice[sourceP] * nQty;
+		}
+
+	}
+
+	// cancel order from the order list
+	// position = the position required to be removed
+	void cancelOrder(int position)
+	{
+		// fix subtotal
+		subtotal = subtotal - (oPrice[position] * oQty[position]);
+
+		// fix quantity
+		resetQty(position);
+
+		// erase the item data
+		oName.erase(oName.begin() + position);
+		oPrice.erase(oPrice.begin() + position);
+		oQty.erase(oQty.begin() + position);
+	}
+
+	void resetQty(int i)	// i = position
+	{
+		// search item by each category
+		bool isHere = false;
+		int orgPosition;	// position for searched item
+
+		// search in APPETIZER
+		orgPosition = searchItem(i, oName, appName, isHere);
+
+		if (isHere == true)
+		{
+			appQty[orgPosition] = appQty[orgPosition] + oQty[i];
+		}
+		else
+		{
+			// search in DRINK
+			orgPosition = searchItem(i, oName, drinkName, isHere);
+
+			if (isHere == true)
+			{
+				drinkQty[orgPosition] = drinkQty[orgPosition] + oQty[i];
+			}
+			else
+			{
+				// search in DESERT
+				orgPosition = searchItem(i, oName, desName, isHere);
+
+				if (isHere == true)
+				{
+					desQty[orgPosition] = desQty[orgPosition] + oQty[i];
+				}
+				else
+				{
+					// search in ENTREE
+					orgPosition = searchItem(i, oName, entName, isHere);
+
+					if (isHere == true)
+					{
+						entQty[orgPosition] = entQty[orgPosition] + oQty[i];
+					}
+				}
+			}
+		}
+	}
+
+	// search the position that matches to the string content in source[i]
+	int searchItem(int i, vector<string>& source, vector<string>& catName, bool& isHere)
+	{
+		int position;
+
+		for (int a = 0; a < catName.size(); a++)
+		{
+			if (source[i] == catName[a])
+			{
+				position = a;
+				isHere = true;
+				break;
+			}
+			else
+				position = 0;
+				isHere = false;
+		}
+
+		return position;
 	}
 
 	// show orders and make a payment
@@ -331,7 +603,7 @@ public:
 
 		logo();
 		cout << "Make a Payment" << endl;
-		showOrder(oName, oPrice, oQty);
+		showOrder();
 
 		cout << endl;
 
@@ -363,7 +635,6 @@ public:
 			cin >> pay;
 
 			// calculate balance
-
 			balance = balance - pay;
 
 			// check error
@@ -460,7 +731,7 @@ public:
 	}
 
 	// check input error for Top Menu
-	bool inputErrorT(int choice, int size)
+	bool inputError(int choice, int size)
 	{
 		if (choice < 1 || choice > size)
 		{
@@ -503,7 +774,7 @@ public:
 			return false;
 	}
 
-	bool qtyError(int catChoice, int qtyChoice, vector<int>& quantity)
+	bool qtyError(int catChoice, int qtyChoice, vector<int>& catQty)
 	{
 		bool error = true;
 
@@ -511,15 +782,13 @@ public:
 		{
 			cout << "*Input Error*" << endl;
 			cout << "Please Re-Enter a Valid Number." << endl;
-			cin.clear();
 
 			error = true;
 		}
-		else if (qtyChoice > quantity[catChoice - 1])
+		else if (qtyChoice > catQty[catChoice - 1])
 		{
 			cout << "I'm sorry. We cannot serve that many." << endl;
-			cout << "You can order up to " << quantity[catChoice - 1] << " for this menu." << endl;
-			cin.clear();
+			cout << "You can order up to " << catQty[catChoice - 1] << " for this menu." << endl;
 
 			error = true;
 		}
@@ -571,6 +840,5 @@ int main()
 /*
 
 1 ... input file not found
-2 ... invalid input (not in the code yet)
 
 */
